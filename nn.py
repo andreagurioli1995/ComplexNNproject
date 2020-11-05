@@ -9,6 +9,9 @@ class nn:
 
 
 x= nn(1)
+mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt","r")
+a= mydataset.read
+print(a)
 
 #trasposta
 #training_outputs= np.array([[0,1,1,0]]).T
