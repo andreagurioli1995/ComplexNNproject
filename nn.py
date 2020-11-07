@@ -2,15 +2,28 @@ import numpy as np
 class nn:
     def __init__(self,x):
         self.x=x
-        print(x)
     def getX(self):
         return self.x
 
 
 
 x= nn(1)
+
+output=[]
+inputT=[]
 mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt","r")
-a= mydataset.read
+for x in range(10000):
+    output.append(int(mydataset.read(1)))
+    temp=next(mydataset).split()
+    for x in range(len(temp)):
+       temp[x]=int(temp[x])
+    inputT.append(temp)
+
+
+
+print(output[0]," ",inputT[0], len(inputT[0]))
+
+a=np.array(inputT[0]).T
 print(a)
 
 #trasposta
