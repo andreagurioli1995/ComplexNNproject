@@ -42,4 +42,8 @@ print(a)
 #def sigmond_der(x):
 #    return x*(1-x)
 
-#commento prova
+#alternativa alla funzione di sigmund:
+# rectified linear function
+#def rectified(x):
+#	return max(0.0, x)
+#"""https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/"""
