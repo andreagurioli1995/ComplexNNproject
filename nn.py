@@ -42,3 +42,4 @@ print(a)
 #def sigmond_der(x):
 #    return x*(1-x)
 
+#commento prova
