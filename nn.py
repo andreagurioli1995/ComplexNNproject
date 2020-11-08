@@ -8,7 +8,7 @@ class nn:
 
     def getX(self):
         return self.x
-
+ 
 
 x=na([12,3])
 x= nn([12,22,34])
