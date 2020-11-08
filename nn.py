@@ -14,17 +14,15 @@ inputT=[]
 mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt","r")
 for x in range(10000):
     output.append(int(mydataset.read(1)))
-    temp=next(mydataset).split()
-    for x in range(len(temp)):
-       temp[x]=int(temp[x])
-    inputT.append(temp)
+    inputT.append([int(x) for x in next(mydataset).split()])
+
 
 
 
 print(output[0]," ",inputT[0], len(inputT[0]))
 
-a=np.array(inputT[0]).T
-print(a)
+a=np.array([inputT[0]]).T
+#print(a)
 
 #trasposta
 #training_outputs= np.array([[0,1,1,0]]).T
