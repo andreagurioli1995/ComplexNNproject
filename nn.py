@@ -1,13 +1,17 @@
 import numpy as np
+from na import na
 class nn:
-    def __init__(self,x):
-        self.x=x
+
+    def __init__(self,myLayers):
+        self.myLayers=myLayers
+        self.NumberLayers= len(myLayers)
+
     def getX(self):
         return self.x
 
 
-
-x= nn(1)
+x=na([12,3])
+x= nn([12,22,34])
 
 output=[]
 inputT=[]
