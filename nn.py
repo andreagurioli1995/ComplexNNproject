@@ -28,7 +28,6 @@ class nn:
     def getPesi(self):
         return self.pesi
 
-<<<<<<< HEAD
     def setOutputs(self, inputs) :
         for x in range(100) :
             self.outputs.append(self.feedForward(inputs[x]))
@@ -43,11 +42,6 @@ class nn:
             #print(targets[i], targetVector)
             totalSum = np.linalg.norm(self.outputs[i] - targets[i])**2
         return totalSum / m
-=======
-    def MSR(self) :
-        pass
-
->>>>>>> ab82e6f17c2054e1e033dce1d56b4b48b8735b8e
 
     def TrainNN(self, nTimes):
         pass
@@ -65,19 +59,12 @@ nn1 = nn([12, 12])
 ####################################################
 # input dal file
 
-<<<<<<< HEAD
-targets = []
-inputsTrain = []
-mydataset = open("data/MnistTrain.txt", "r")
-=======
-nn_prova = nn([12, 12])
 # print(x.getPesi())
 
 target = []
 inputT = []
-#mydataset = open("data/MnistTrain.txt", "r")
-mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
->>>>>>> ab82e6f17c2054e1e033dce1d56b4b48b8735b8e
+mydataset = open("data/MnistTrain.txt", "r")
+#mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
 for x in range(10000):
     target = int(mydataset.read(1))
     number = [int(x) for x in next(mydataset).split()]
