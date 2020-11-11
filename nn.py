@@ -29,7 +29,7 @@ class nn:
         return self.pesi
 
     def MSR(self) :
-        
+        pass
 
 
     def TrainNN(self, nTimes):
@@ -50,7 +50,8 @@ nn_prova = nn([12, 12])
 
 target = []
 inputT = []
-mydataset = open("data/MnistTrain.txt", "r")
+#mydataset = open("data/MnistTrain.txt", "r")
+mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
 for x in range(10000):
     target.append(int(mydataset.read(1)))
     inputT.append([int(x) for x in next(mydataset).split()])
