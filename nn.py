@@ -32,15 +32,17 @@ class nn:
         for x in range(100) :
             self.outputs.append(self.feedForward(inputs[x]))
 
-    def MSR(self, targets) :
-        m = 10
+    def MSE(self, targets) :
+        m = 1
         totalSum = 0
         # dovremo ricordarci di modificare if x == targets[i] in modo da avere 
         # ogni volta i valori di una batch successiva, dopo che avremo suddiviso gli input in batches
         for i in range(m) :
             targetVector = [float(1) if x == targets[i] else float(0) for x in range(10)]
             #print(targets[i], targetVector)
-            totalSum = np.linalg.norm(self.outputs[i] - targets[i])**2
+            totalSum += np.linalg.norm(self.outputs[i] - targetVector)**2
+        print(targetVector, "\n", self.outputs[0])
+
         return totalSum / m
 
     def TrainNN(self, nTimes):
@@ -59,10 +61,8 @@ nn1 = nn([12, 12])
 ####################################################
 # input dal file
 
-# print(x.getPesi())
-
-target = []
-inputT = []
+targets = []
+inputsTrain = []
 mydataset = open("data/MnistTrain.txt", "r")
 #mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
 for x in range(10000):
@@ -82,5 +82,5 @@ nn1.setOutputs(inputsTrain)
 minibatchesSize = 10
 minibatch = inputsTrain[:minibatchesSize]
 
-print("COST: ", nn1.MSR(targets))
+print("COST: ", nn1.MSE(targets))
 print("\n\n\n\n\n")
