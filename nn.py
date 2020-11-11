@@ -11,7 +11,7 @@ x= nn(1)
 
 output=[]
 inputT=[]
-mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt","r")
+mydataset = open("data/MnistTrain.txt", "r")
 for x in range(10000):
     output.append(int(mydataset.read(1)))
     inputT.append([int(x) for x in next(mydataset).split()])
