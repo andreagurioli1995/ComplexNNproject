@@ -25,12 +25,12 @@ class nn:
     def sigmond_der(self, x):
         return x*(1-x)
 
+    def cost_der(self, output_activations, y):
+        return (output_activations-y) 
+
     def getPesi(self):
         return self.pesi
 
-    def setOutputs(self, inputs) :
-        for x in range(100) :
-            self.outputs.append(self.feedForward(inputs[x]))
 
     def MSE(self, targets) :
         m = 1
@@ -40,20 +40,30 @@ class nn:
         for i in range(m) :
             targetVector = [float(1) if x == targets[i] else float(0) for x in range(10)]
             #print(targets[i], targetVector)
-            totalSum += np.linalg.norm(self.outputs[i] - targetVector)**2
-        print(targetVector, "\n", self.outputs[0])
+            totalSum += 0.5*np.linalg.norm(self.outputs[i] - targetVector)**2
+       # print(targetVector, "\n", self.outputs[0])
 
         return totalSum / m
 
-    def TrainNN(self, nTimes):
-        pass
 
-    def feedForward(self, my_input):
+
+
+    def backProp(self, my_input,targetVec):
         temp = my_input
-        for x in range(len(self.myLayers) + 1) :
-            output = self.sigmond(np.dot(self.pesi[x], temp))
-            temp = output
-        return output
+        self.a=[]
+        self.z=[]
+        self.adj=[]
+        for x in range(len(self.myLayers) + 1):
+            tempz=np.dot(self.pesi[x], temp)
+            self.z.append(tempz)
+            self.output = self.sigmond(tempz)
+            self.a.append(self.output)
+            temp = self.output
+        #
+        self.adjL=np.multiply(self.cost_der(self.output,targetVec),self.sigmond_der(self.z[len(self.z)-1]))
+
+
+        return self.output
 
 
 nn1 = nn([12, 12])
@@ -63,24 +73,31 @@ nn1 = nn([12, 12])
 
 targets = []
 inputsTrain = []
-mydataset = open("data/MnistTrain.txt", "r")
-#mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
+#mydataset = open("data/MnistTrain.txt", "r")
+mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
 for x in range(10000):
     target = int(mydataset.read(1))
     number = [int(x) for x in next(mydataset).split()]
     targets.append(target)
     inputsTrain.append(number)
 
+#vettori di target
+targetVectors=[]
+for i in range(len(targets)):
+    targetVectors.append([float(1) if x == targets[i] else float(0) for x in range(10)])
+
+
+
 mydataset.close()
 
 ####################################################
 # feedforward
+#for i in range(len(inputsTrain)):
+nn1.backProp(inputsTrain[0],targetVectors[0])
 
-nn1.feedForward(inputsTrain[0])
-nn1.setOutputs(inputsTrain)
+
 
 minibatchesSize = 10
 minibatch = inputsTrain[:minibatchesSize]
 
-print("COST: ", nn1.MSE(targets))
-print("\n\n\n\n\n")
+#print("COST: ", nn1.MSE(targets))
