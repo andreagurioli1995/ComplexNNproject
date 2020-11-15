@@ -52,15 +52,32 @@ class nn:
         temp = my_input
         self.a=[]
         self.z=[]
+
+
+        #adj invertiti
         self.adj=[]
+        #self.delPesi=[np.zeros(w.shape) for w in self.pesi]
+        self.delPesi=[]
         for x in range(len(self.myLayers) + 1):
             tempz=np.dot(self.pesi[x], temp)
             self.z.append(tempz)
             self.output = self.sigmond(tempz)
             self.a.append(self.output)
             temp = self.output
-        #
+        #BP1
         self.adjL=np.multiply(self.cost_der(self.output,targetVec),self.sigmond_der(self.z[len(self.z)-1]))
+
+        tempAdj=self.adjL
+        #BP2
+        for x in range(1,len(self.myLayers)+1):
+                adl=np.multiply(np.dot(self.pesi[len(self.pesi)-x].T,tempAdj),self.sigmond_der(self.z[len(self.z)-1-x]))
+                tempAdj=adl
+                self.adj.append(adl)
+        #BP4 layer finale
+        LastDel=np.dot(self.adjL,self.a[len(self.a)-2].T)
+        print(LastDel)
+        #d=np.dot(self.a[],self.adjL)
+
 
 
         return self.output
