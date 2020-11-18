@@ -74,9 +74,8 @@ class nn:
                 tempAdj=adl
                 self.adj.append(adl)
         #BP4 layer finale
-        #LastDel=np.dot(self.adjL,self.a[len(self.a)-2].T)
-        print(self.adjL,self.a[len(self.a)-2].T)
-        #print(LastDel)
+        LastDel=np.dot(np.array([self.a[len(self.a)-2]]).T,np.array([self.adjL]))
+
         #d=np.dot(self.a[],self.adjL)
 
         return self.output
