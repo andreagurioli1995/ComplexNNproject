@@ -66,21 +66,26 @@ class nn:
             temp = self.output
         #BP1
         self.adjL=np.multiply(self.cost_der(self.output,targetVec),self.sigmond_der(self.z[len(self.z)-1]))
-
         tempAdj=self.adjL
+
         #BP2
         for x in range(1,len(self.myLayers)+1):
                 adl=np.multiply(np.dot(self.pesi[len(self.pesi)-x].T,tempAdj),self.sigmond_der(self.z[len(self.z)-1-x]))
                 tempAdj=adl
                 self.adj.append(adl)
         #BP4 layer finale
-        LastDel=np.dot(self.adjL,self.a[len(self.a)-2].T)
-        print(LastDel)
+        #LastDel=np.dot(self.adjL,self.a[len(self.a)-2].T)
+        print(self.adjL,self.a[len(self.a)-2].T)
+        #print(LastDel)
         #d=np.dot(self.a[],self.adjL)
 
-
-
         return self.output
+
+
+
+
+
+
 
 
 nn1 = nn([12, 12])
