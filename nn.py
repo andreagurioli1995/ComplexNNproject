@@ -26,65 +26,79 @@ class nn:
         return x*(1-x)
 
     def cost_der(self, output_activations, y):
-        return (output_activations-y) 
+        return (output_activations-y)
 
     def getPesi(self):
         return self.pesi
 
-
-    def MSE(self, targets) :
+    def MSE(self, targets):
         m = 1
         totalSum = 0
-        # dovremo ricordarci di modificare if x == targets[i] in modo da avere 
+        # dovremo ricordarci di modificare if x == targets[i] in modo da avere
         # ogni volta i valori di una batch successiva, dopo che avremo suddiviso gli input in batches
-        for i in range(m) :
-            targetVector = [float(1) if x == targets[i] else float(0) for x in range(10)]
+        for i in range(m):
+            targetVector = [float(1) if x == targets[i]
+                            else float(0) for x in range(10)]
             #print(targets[i], targetVector)
             totalSum += 0.5*np.linalg.norm(self.outputs[i] - targetVector)**2
        # print(targetVector, "\n", self.outputs[0])
 
         return totalSum / m
 
-
-
-
-    def backProp(self, my_input,targetVec):
+    def backProp(self, my_input, targetVec):
         temp = my_input
-        self.a=[]
-        self.z=[]
+        self.a = []
+        self.z = []
 
-
-        #adj invertiti
-        self.adj=[]
+        self.a.append(my_input)
+        # adj invertiti
+        self.adj = []
+        self.nablac = []
         #self.delPesi=[np.zeros(w.shape) for w in self.pesi]
-        self.delPesi=[]
+        self.delPesi = []
         for x in range(len(self.myLayers) + 1):
-            tempz=np.dot(self.pesi[x], temp)
+            tempz = np.dot(self.pesi[x], temp)
             self.z.append(tempz)
             self.output = self.sigmond(tempz)
             self.a.append(self.output)
             temp = self.output
-        #BP1
-        self.adjL=np.multiply(self.cost_der(self.output,targetVec),self.sigmond_der(self.z[len(self.z)-1]))
-        tempAdj=self.adjL
+        # BP1
+        self.adjL = np.multiply(self.cost_der(
+            self.output, targetVec), self.sigmond_der(self.z[len(self.z)-1]))
+        tempAdj = self.adjL
 
-        #BP2
-        for x in range(1,len(self.myLayers)+1):
-                adl=np.multiply(np.dot(self.pesi[len(self.pesi)-x].T,tempAdj),self.sigmond_der(self.z[len(self.z)-1-x]))
-                tempAdj=adl
-                self.adj.append(adl)
-        #BP4 layer finale
-        LastDel=np.dot(np.array([self.a[len(self.a)-2]]).T,np.array([self.adjL]))
+        # gli adjustment vanno dall'ultimo al primo
+        self.adj.insert(0, self.adjL)
 
-        #d=np.dot(self.a[],self.adjL)
+        # BP2
+        for x in range(1, len(self.myLayers)+1):
+            adl = np.multiply(np.dot(self.pesi[len(
+                self.pesi)-x].T, tempAdj), self.sigmond_der(self.z[len(self.z)-1-x]))
+            tempAdj = adl
+            self.adj.insert(0, adl)
 
-        return self.output
+        # BP4 layer finale
+        #LastDel=np.array([self.adjL]).T @ np.array([self.a[len(self.a)-2]])
+        #self.pesi[-1]=self.pesi[-1] - LastDel
+        # print(self.pesi[-1])
 
+        # BP4
+        for x in range(0, len(self.myLayers)+1):
+            Del = np.dot(
+                np.array([self.adj[len(self.adj)-x-1]]).T, np.array([self.a[len(self.a)-2-x]]))
+            self.nablac.insert(0, Del)
+        return self.nablac
 
+    def GradientDescent(self):
+        for x in range(len(self.pesi)):
+            self.pesi[x] = self.pesi[x]-self.nablac[x]
 
-
-
-
+    def feedforward(self, my_input):
+        temp = my_input
+        for x in range(len(self.myLayers) + 1):
+            output = self.sigmond(np.dot(self.pesi[x], temp))
+            temp = output
+        return output
 
 
 nn1 = nn([12, 12])
@@ -95,30 +109,33 @@ nn1 = nn([12, 12])
 targets = []
 inputsTrain = []
 #mydataset = open("data/MnistTrain.txt", "r")
-mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
+mydataset = open(
+    r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
 for x in range(10000):
     target = int(mydataset.read(1))
     number = [int(x) for x in next(mydataset).split()]
     targets.append(target)
     inputsTrain.append(number)
 
-#vettori di target
-targetVectors=[]
+# vettori di target
+targetVectors = []
 for i in range(len(targets)):
-    targetVectors.append([float(1) if x == targets[i] else float(0) for x in range(10)])
-
+    targetVectors.append(
+        [float(1) if x == targets[i] else float(0) for x in range(10)])
 
 
 mydataset.close()
 
 ####################################################
 # feedforward
-#for i in range(len(inputsTrain)):
-nn1.backProp(inputsTrain[0],targetVectors[0])
+for j in range(10):
+    nn1.backProp(inputsTrain[j], targetVectors[j])
+    nn1.GradientDescent()
+
+print(nn1.feedforward(inputsTrain[0]))
 
 
-
-minibatchesSize = 10
-minibatch = inputsTrain[:minibatchesSize]
+#minibatchesSize = 10
+#minibatch = inputsTrain[:minibatchesSize]
 
 #print("COST: ", nn1.MSE(targets))
