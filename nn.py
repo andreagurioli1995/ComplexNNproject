@@ -64,7 +64,7 @@ class nn:
             temp = self.output
         # BP1
         self.adjL = np.multiply(self.cost_der(
-            self.output, targetVec), self.sigmond_der(self.z[len(self.z)-1]))
+            self.output, targetVec), self.sigmond_der(self.z[-1]))
         tempAdj = self.adjL
 
         # gli adjustment vanno dall'ultimo al primo
@@ -72,8 +72,7 @@ class nn:
 
         # BP2
         for x in range(1, len(self.myLayers)+1):
-            adl = np.multiply(np.dot(self.pesi[len(
-                self.pesi)-x].T, tempAdj), self.sigmond_der(self.z[len(self.z)-1-x]))
+            adl = np.multiply(np.dot(self.pesi[-x].T, tempAdj), self.sigmond_der(self.z[-1-x]))
             tempAdj = adl
             self.adj.insert(0, adl)
 
@@ -85,7 +84,7 @@ class nn:
         # BP4
         for x in range(0, len(self.myLayers)+1):
             Del = np.dot(
-                np.array([self.adj[len(self.adj)-x-1]]).T, np.array([self.a[len(self.a)-2-x]]))
+                np.array([self.adj[-1-x]]).T, np.array([self.a[-2-x]]))
             self.nablac.insert(0, Del)
         return self.nablac
 
