@@ -101,6 +101,47 @@ class nn:
         return output
 
 
+
+
+
+    def TrainNet(self,inputTr,inputTrag):
+        #minibatch da 10
+        list_of_inp = zip(*(iter(inputTr),) * 10)
+        list_of_targ = zip(*(iter(inputTrag),) * 10)
+        list_Global= zip(list_of_inp,list_of_targ)
+        for x in list_Global:
+          self.minibatchUpd(x[0],x[1])
+
+
+
+
+    def minibatchUpd(self,inpTraining,inputTragM):
+        deltanabla=[]
+        summatorydel=[]
+        for x in range(len(inputTragM)):
+            deltanabla+=[self.backProp(inpTraining[x],inputTragM[x])]
+        #print(deltanabla[0][0].shape,deltanabla[0][1].shape,deltanabla[0][2].shape)
+        for x in range(len(deltanabla)):
+            summatorydel=summatorydel+deltanabla[x]
+            
+
+
+        for x in range(len(self.pesi)):
+            self.pesi[x] = self.pesi[x]-(0.00000000000001/10)*summatorydel[x]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 nn1 = nn([12, 12])
 
 ####################################################
@@ -128,14 +169,18 @@ mydataset.close()
 
 ####################################################
 # feedforward
-for j in range(10):
-    nn1.backProp(inputsTrain[j], targetVectors[j])
-    nn1.GradientDescent()
+#for j in range(5):
+#    nn1.backProp(inputsTrain[j], targetVectors[j])
+#    nn1.GradientDescent()
+
+
+
+print(nn1.feedforward(inputsTrain[0]))
+
+for j in range(2):
+    nn1.TrainNet(inputsTrain, targetVectors)
+
 
 print(nn1.feedforward(inputsTrain[0]))
 
 
-#minibatchesSize = 10
-#minibatch = inputsTrain[:minibatchesSize]
-
-#print("COST: ", nn1.MSE(targets))
