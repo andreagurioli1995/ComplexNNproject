@@ -89,6 +89,9 @@ class nn:
             self.nablac.insert(0, Del)
         return self.nablac
 
+
+
+
     def GradientDescent(self):
         for x in range(len(self.pesi)):
             self.pesi[x] = self.pesi[x]-self.nablac[x]
@@ -115,19 +118,15 @@ class nn:
 
 
 
-    def minibatchUpd(self,inpTraining,inputTragM):
-        deltanabla=[]
-        summatorydel=[]
-        for x in range(len(inputTragM)):
-            deltanabla+=[self.backProp(inpTraining[x],inputTragM[x])]
-        #print(deltanabla[0][0].shape,deltanabla[0][1].shape,deltanabla[0][2].shape)
-        for x in range(len(deltanabla)):
-            summatorydel=summatorydel+deltanabla[x]
-            
+
+    def minibatchUpd(self,inpTraining,inputTargM):
+        Sumdeltanabla=[]
+        for x in range(len(inputTargM)):
+            Sumdeltanabla+=self.backProp(inpTraining[x],inputTargM[x])
 
 
         for x in range(len(self.pesi)):
-            self.pesi[x] = self.pesi[x]-(0.00000000000001/10)*summatorydel[x]
+            self.pesi[x] = self.pesi[x]-(0.000000000001/10)*Sumdeltanabla[x]
 
 
 
