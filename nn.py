@@ -1,5 +1,5 @@
 import numpy as np
-from na import na
+
 
 
 
@@ -63,10 +63,9 @@ class nn:
         nablac = []
         delPesi = []
         for x in range(len(self.myLayers) + 1):
-            #print(np.dot(self.pesi[0], temp),"\n",self.bias[0],"\n",self.bias[0].T)
             tempz = np.dot(self.pesi[x], np.array(temp))
-          #  for t in range(len(tempz)):
-          #      tempz[t]=np.add(tempz[t],self.bias[x][t])
+            for t in range(len(tempz)):
+                tempz[t]=np.add(tempz[t],self.bias[x][t])
             z.append(tempz)
             output = self.sigmond(tempz)
             a.append(output)
@@ -81,8 +80,6 @@ class nn:
         # BP2
         for x in range(1, len(self.myLayers)+1):
             adl = np.multiply(np.dot(self.pesi[-x].T, tempAdj), self.sigmond_der(z[-1-x]))
-            #if(x==2):
-                #print("HERE MY ADL",adl,  "HERE MY self", z[-1-x])
             tempAdj = adl
             adj.insert(0, adl)
 
@@ -96,8 +93,6 @@ class nn:
                 np.array([adj[-1-x]]).T, np.array([a[-2-x]]))
             nablac.insert(0, Del)
 
-            #if(x==2):
-             #   print(np.array([adj[-1-x]]).T)
         return nablac,adj
 
 
@@ -108,11 +103,14 @@ class nn:
             self.pesi[x] = self.pesi[x]-nabla[x]
 
 
-#da aggiungere bias
+
     def feedforward(self, my_input):
         temp = my_input
         for x in range(len(self.myLayers) + 1):
-            output = self.sigmond(np.dot(self.pesi[x], temp))
+            tempz = np.dot(self.pesi[x], np.array(temp))
+            for t in range(len(tempz)):
+                tempz[t]=np.add(tempz[t],self.bias[x][t])
+            output = self.sigmond(tempz)
             temp = output
         return output
 
@@ -140,15 +138,27 @@ class nn:
             if(len(Sumdeltanabla)==0):
                 Sumdeltanabla=nabla
                 Sumbias=adj
+            print(adj[0]) #??????
             for x in range(len(nabla)):
                 Sumdeltanabla[x]=np.add(Sumdeltanabla[x],nabla[x])
                 Sumbias[x]=np.add(Sumbias[x],adj[x])
+            print(Sumbias[0])
+            print(Sumdeltanabla[0][5])
+            ############################################################
+            exit(99999999)
 
 
-
+       
         for x in range(len(self.pesi)):
-            self.pesi[x] = self.pesi[x]-(3/10)*Sumdeltanabla[x]
+            #self.pesi[x] = self.pesi[x]-(3/10)*Sumdeltanabla[x]
             #self.bias[x] = self.bias[x]-(3/10)*Sumbias[x]
+            for z in range(len(Sumdeltanabla[x])):
+                self.pesi[x][z] = self.pesi[x][z]-(3/10)*Sumdeltanabla[x][z]
+            for z in range(len(Sumbias[x])):
+                self.bias[x][z]=self.bias[x][z]-(3/10)*Sumbias[x][z]
+            #print(self.bias[x],"mylayer",x)
+
+    
         
 
 
@@ -207,7 +217,7 @@ mydataset.close()
 print(nn1.feedforward(inputsTrain[0]))
 
 
-for j in range(30):
+for j in range(1):
     nn1.TrainNet(inputsTrain, targetVectors)
 
 
