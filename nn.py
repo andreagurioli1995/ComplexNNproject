@@ -2,6 +2,7 @@ import numpy as np
 from na import na
 
 
+
 class nn:
     def __init__(self, myLayers):
         self.myLayers = myLayers
@@ -9,21 +10,26 @@ class nn:
         # definisco primo layer di input
         self.previous = 784
         self.pesi = []
-        self.outputs = []
+        self.bias=[]
         for x in self.myLayers:
             # inizializzo matrice di pesi randomica
             self.pesi += [2*np.random.random((x, self.previous))-1]
+            #inizializzo matrice di byas
+            self.bias += [2*np.random.random((x,1))-1]
             # aggiorno layer precedente per definizione matrice pesi successiva
             self.previous = x
+        ## inizializzo matrice di bias randomica per layer output
+        self.bias += [2*np.random.random((10,1))-1]
+
         # inizializzo matrice di pesi randomica per layer output
         self.pesi += [2*np.random.random((10, self.previous))-1]
         # print(self.pesi)
 
     def sigmond(self, x):
-        return 1/(1+np.exp(-x))
+        return 1.0/(1.0+np.exp(-x))
 
     def sigmond_der(self, x):
-        return x*(1-x)
+        return self.sigmond(x)*(1-self.sigmond(x))
 
     def cost_der(self, output_activations, y):
         return (output_activations-y)
@@ -46,55 +52,63 @@ class nn:
         return totalSum / m
 
     def backProp(self, my_input, targetVec):
+
         temp = my_input
-        self.a = []
-        self.z = []
+        a = []
+        z = []
 
-        self.a.append(my_input)
+        a.append(my_input)
         # adj invertiti
-        self.adj = []
-        self.nablac = []
-        #self.delPesi=[np.zeros(w.shape) for w in self.pesi]
-        self.delPesi = []
+        adj = []
+        nablac = []
+        delPesi = []
         for x in range(len(self.myLayers) + 1):
-            tempz = np.dot(self.pesi[x], temp)
-            self.z.append(tempz)
-            self.output = self.sigmond(tempz)
-            self.a.append(self.output)
-            temp = self.output
+            #print(np.dot(self.pesi[0], temp),"\n",self.bias[0],"\n",self.bias[0].T)
+            tempz = np.dot(self.pesi[x], np.array(temp))
+          #  for t in range(len(tempz)):
+          #      tempz[t]=np.add(tempz[t],self.bias[x][t])
+            z.append(tempz)
+            output = self.sigmond(tempz)
+            a.append(output)
+            temp = output
         # BP1
-        self.adjL = np.multiply(self.cost_der(
-            self.output, targetVec), self.sigmond_der(self.z[-1]))
-        tempAdj = self.adjL
-
-        # gli adjustment vanno dall'ultimo al primo
-        self.adj.insert(0, self.adjL)
+        adjL = np.multiply(self.cost_der(
+            output, targetVec), self.sigmond_der(z[-1]))
+        tempAdj = adjL
+        # gli adjustment vanno dal primo all'ultimo
+        adj.insert(0, adjL)
 
         # BP2
         for x in range(1, len(self.myLayers)+1):
-            adl = np.multiply(np.dot(self.pesi[-x].T, tempAdj), self.sigmond_der(self.z[-1-x]))
+            adl = np.multiply(np.dot(self.pesi[-x].T, tempAdj), self.sigmond_der(z[-1-x]))
+            #if(x==2):
+                #print("HERE MY ADL",adl,  "HERE MY self", z[-1-x])
             tempAdj = adl
-            self.adj.insert(0, adl)
+            adj.insert(0, adl)
 
-        # BP4 layer finale
-        #LastDel=np.array([self.adjL]).T @ np.array([self.a[len(self.a)-2]])
-        #self.pesi[-1]=self.pesi[-1] - LastDel
-        # print(self.pesi[-1])
+
+
+
 
         # BP4
         for x in range(0, len(self.myLayers)+1):
             Del = np.dot(
-                np.array([self.adj[-1-x]]).T, np.array([self.a[-2-x]]))
-            self.nablac.insert(0, Del)
-        return self.nablac
+                np.array([adj[-1-x]]).T, np.array([a[-2-x]]))
+            nablac.insert(0, Del)
+
+            #if(x==2):
+             #   print(np.array([adj[-1-x]]).T)
+        return nablac,adj
 
 
 
 
-    def GradientDescent(self):
+    def GradientDescent(self,nabla):
         for x in range(len(self.pesi)):
-            self.pesi[x] = self.pesi[x]-self.nablac[x]
+            self.pesi[x] = self.pesi[x]-nabla[x]
 
+
+#da aggiungere bias
     def feedforward(self, my_input):
         temp = my_input
         for x in range(len(self.myLayers) + 1):
@@ -120,12 +134,22 @@ class nn:
 
     def minibatchUpd(self,inpTraining,inputTargM):
         Sumdeltanabla=[]
+        Sumbias=[]
         for x in range(len(inputTargM)):
-            Sumdeltanabla+=self.backProp(inpTraining[x],inputTargM[x])
+            nabla,adj=self.backProp(inpTraining[x],inputTargM[x])
+            if(len(Sumdeltanabla)==0):
+                Sumdeltanabla=nabla
+                Sumbias=adj
+            for x in range(len(nabla)):
+                Sumdeltanabla[x]=np.add(Sumdeltanabla[x],nabla[x])
+                Sumbias[x]=np.add(Sumbias[x],adj[x])
+
 
 
         for x in range(len(self.pesi)):
-            self.pesi[x] = self.pesi[x]-(0.000000000001/10)*Sumdeltanabla[x]
+            self.pesi[x] = self.pesi[x]-(3/10)*Sumdeltanabla[x]
+            #self.bias[x] = self.bias[x]-(3/10)*Sumbias[x]
+        
 
 
 
@@ -140,7 +164,9 @@ class nn:
 
 
 
-nn1 = nn([12, 12])
+
+
+nn1 = nn([12,12])
 
 ####################################################
 # input dal file
@@ -153,6 +179,7 @@ mydataset = open(
 for x in range(10000):
     target = int(mydataset.read(1))
     number = [int(x) for x in next(mydataset).split()]
+    #number = [1 if int(x)>150 else 0 for x in next(mydataset).split()]
     targets.append(target)
     inputsTrain.append(number)
 
@@ -165,20 +192,26 @@ for i in range(len(targets)):
 
 mydataset.close()
 
+
+
+
 ####################################################
 # feedforward
-#for j in range(5):
-#    nn1.backProp(inputsTrain[j], targetVectors[j])
-#    nn1.GradientDescent()
+#for x in range(30):
+#    for j in range(10000):
+#        nabla,adj = nn1.backProp(inputsTrain[j], targetVectors[j])
+#        nn1.GradientDescent(nabla)
 
 
 
 print(nn1.feedforward(inputsTrain[0]))
 
-for j in range(2):
+
+for j in range(30):
     nn1.TrainNet(inputsTrain, targetVectors)
 
 
-print(nn1.feedforward(inputsTrain[0]))
+
+print(nn1.feedforward(inputsTrain[0]),"\n",targetVectors[0])
 
 
