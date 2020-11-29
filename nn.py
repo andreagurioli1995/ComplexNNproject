@@ -7,6 +7,8 @@ class nn:
         #self.NumberLayers = len(myLayers)
         # definisco primo layer di input
         self.previous = 784
+        self.eta = 3
+        self.mb_size = 10 #minibatch da 10
         self.pesi = []
         self.bias=[]
         for x in self.myLayers:
@@ -27,7 +29,7 @@ class nn:
         return 1.0/(1.0+np.exp(-x))
 
     def sigmond_der(self, x):
-        return self.sigmond(x)* (1-self.sigmond(x))
+        return self.sigmond(x)*(1-self.sigmond(x))
 
     def cost_der(self, output_activations, y):
         return (output_activations-y)
@@ -35,22 +37,27 @@ class nn:
     def getPesi(self):
         return self.pesi
 
-    def MSE(self, targets):
+    def getEta(self):
+        return self.eta
+
+    def getmbSize(self):
+        return self.mb_size
+
+    def MSE(self, targetsTrain, outputs):
         m = 1
         totalSum = 0
-        # dovremo ricordarci di modificare if x == targets[i] in modo da avere
+        # dovremo ricordarci di modificare if x == targetsTrain[i] in modo da avere
         # ogni volta i valori di una batch successiva, dopo che avremo suddiviso gli input in batches
         for i in range(m):
-            targetVector = [float(1) if x == targets[i]
+            targetVector = [float(1) if x == targetsTrain[i]
                             else float(0) for x in range(10)]
-            #print(targets[i], targetVector)
-            totalSum += 0.5*np.linalg.norm(self.outputs[i] - targetVector)**2
+            #print(targetsTrain[i], targetVector)
+            totalSum += 0.5*np.linalg.norm(outputs[i] - targetVector)**2
        # print(targetVector, "\n", self.outputs[0])
 
         return totalSum / m
 
     def backProp(self, my_input, targetVec):
-
         temp = my_input
         a = []
         z = []
@@ -91,14 +98,6 @@ class nn:
         return nablac,adj
 
 
-
-
-    def GradientDescent(self,nabla):
-        for x in range(len(self.pesi)):
-            self.pesi[x] = self.pesi[x]-nabla[x]
-
-
-
     def feedforward(self, my_input):
         temp = my_input
         for x in range(len(self.myLayers) + 1):
@@ -112,18 +111,12 @@ class nn:
 
 
     def TrainNet(self,inputTr,inputTrag):   
-        #minibatch da 10
-        self.mb_size = 10
         list_of_inp = zip(*(iter(inputTr),) * self.mb_size)
         list_of_targ = zip(*(iter(inputTrag),) * self.mb_size)
         list_Global = zip(list_of_inp,list_of_targ)
 
-       
-
         for x in list_Global : 
             self.minibatchUpd(x[0],x[1])
-
-
 
 
 
@@ -139,9 +132,6 @@ class nn:
             for x in range(len(nabla)):
                 Sumdeltanabla[x]=np.add(Sumdeltanabla[x],nabla[x])   # perchè sommi i delta ai deltanabla?
                 Sumbias[x]=np.add(Sumbias[x],adj[x])   
-
-
-        self.eta = 5
        
         for x in range(len(self.pesi)):   
             for z in range(len(Sumdeltanabla[x])):
@@ -149,58 +139,101 @@ class nn:
             for z in range(len(Sumbias[x])):
                 self.bias[x][z]=self.bias[x][z]-(self.eta/self.mb_size)*Sumbias[x][z]
 
+######################################################################################
+# funzioni ausiliarie
 
-    
-        
-
-
-
-nn1 = nn([12,12])
-
-####################################################
-# input dal file
-
-targets = []
-inputsTrain = []
-#mydataset = open("data/MnistTrain.txt", "r")
-mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
-for x in range(30000):
-    target = int(mydataset.read(1))
-    #number = [int(x) for x in next(mydataset).split()]
-    number = [1 if int(x)>90 else 0 for x in next(mydataset).split()]
-    targets.append(target)
-    inputsTrain.append(number)
-
-# vettori di target
-targetVectors = []
-for i in range(len(targets)):
-    targetVectors.append(
-        [float(1) if x == targets[i] else float(0) for x in range(10)])
-
-
-mydataset.close()
-
-####################################################
-
-
-
-
-for x in range(10):
-    nn1.TrainNet(inputsTrain, targetVectors)
-
-
-for x in range(len(inputsTrain)):
-    output=nn1.feedforward(inputsTrain[x])
-    print("output desiderato: ",targets[x])
+def result(output) : 
     max=0
     count=0
     for z in range(len(output)):
         if output[z]>max:
             max=output[z]
             count=z
-    print("output ottenuto: ",count)
+    return count        
+    
+def normalize(x) :
+    grey = 90
+    return 1.0/(1.0+np.exp(-x+grey))
+
+def getEfficiency(inputsVector, targetScalars) :
+    c = 3
+    efficiency = 0.0
+    for x in range(len(inputsVector)):
+        output=nn1.feedforward(inputsVector[x])
+        #print("test", x+1, "(targetTrain, ris): ", targetVector[x], result(output), "      ", targetsTrain[x] == result(output))
+        if targetScalars[x] == result(output) :
+            efficiency += 1.0
+        elif 300*c < x < 300*(c+1) :  # elif temporaneo per vedere dove sbaglia
+            printNumber(inputsVector[x])
+    efficiency = efficiency/len(inputsVector)
+    return efficiency
+
+def printNumber(n) :
+    s = normalize(110)
+    for i in range(28) :
+        for j in range(28) :
+            if(n[i * 28 + j] > s) :
+                print("o", end =" ")
+            else :
+                print(" ", end =" ")
+        print("")
+    
+
+######################################################################################
+# input dal file
+
+targetsTrain = []
+inputsTrain = []
+mydataset = open("data/mnistTrain.txt", "r")
+#mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
+for x in range(30000):  #  numberOfinputs 30000   
+    targetTrain = int(mydataset.read(1))
+    number = [normalize(float(x)) for x in next(mydataset).split()]
+    #number = [1 if int(x)>90 else 0 for x in next(mydataset).split()]
+    targetsTrain.append(targetTrain)
+    inputsTrain.append(number)
+# vettori di targetTrain
+targetVectors = []
+for i in range(len(targetsTrain)):
+    targetVectors.append(
+        [float(1) if x == targetsTrain[i] else float(0) for x in range(10)])
+
+mydataset.close()
 
 
+######################################################################################
+#Testing data
+
+targetsTest = []
+inputsTest = []
+testDataset = open("data/mnistTest.txt", "r")
+#testDataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTest_copy.txt", "r")
+for x in range(10000):     # len(inputsTest) == 10000
+    targetTest = int(testDataset.read(1))
+    numberTest = [normalize(float(x)) for x in next(testDataset).split()]
+    #numberTest = [1 if int(x)>90 else 0 for x in next(testDataset).split()]
+    targetsTest.append(targetTest)
+    inputsTest.append(numberTest)
+
+# vettori di targetTrain
+targetsTestVectors = []
+for i in range(len(targetsTest)):
+    targetsTestVectors.append([float(1) if x == targetsTest[i] else float(0) for x in range(10)])
+
+testDataset.close()
+
+######################################################################################
+#Training
+
+nn1 = nn([12,12])
+numberOfEpochs = 10    # 10 
+print("\n\neta =", nn1.getEta(), " mb size =", nn1.getmbSize(), 
+"\nEFFICIENCY 0 : ", getEfficiency(inputsTest, targetsTest))
+for l in range(numberOfEpochs):
+    nn1.TrainNet(inputsTrain, targetVectors)
+    print("EFFICIENCY", l+1, ": ", getEfficiency(inputsTest, targetsTest))
+
+######################################################################################
 
 
 
