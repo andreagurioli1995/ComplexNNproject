@@ -27,8 +27,7 @@ class nn:
         return 1.0/(1.0+np.exp(-x))
 
     def sigmond_der(self, x):
-        print(x)
-        return np.multiply(self.sigmond(x), (1-self.sigmond(x)))
+        return self.sigmond(x)* (1-self.sigmond(x))
 
     def cost_der(self, output_activations, y):
         return (output_activations-y)
@@ -80,7 +79,6 @@ class nn:
         for x in range(1, len(self.myLayers)+1):
             adl = np.multiply(np.dot(self.pesi[-x].T, tempAdj), self.sigmond_der(np.array(z[-1-x])))
             tempAdj = adl
-            print(x, "        ", z[-1-x], "\n\n", self.sigmond_der(z[-1-x]), "\n\n")
             adj.insert(0, adl)
         
 
@@ -115,19 +113,16 @@ class nn:
 
     def TrainNet(self,inputTr,inputTrag):   
         #minibatch da 10
-        self.mb_size = 1
+        self.mb_size = 10
         list_of_inp = zip(*(iter(inputTr),) * self.mb_size)
         list_of_targ = zip(*(iter(inputTrag),) * self.mb_size)
         list_Global = zip(list_of_inp,list_of_targ)
-       # print("QQQQQQ: ", len(list(list_of_inp)))   # len(list(list_of_inp))) == 1000  
+
        
-        n = 0
-        nMax = 1000
-        for x in list_Global :
-            if n < nMax : 
-                self.minibatchUpd(x[0],x[1])
-                #print("mini batch numero ", n + 1, "\n")
-            n += 1
+
+        for x in list_Global : 
+            self.minibatchUpd(x[0],x[1])
+
 
 
 
@@ -144,23 +139,16 @@ class nn:
             for x in range(len(nabla)):
                 Sumdeltanabla[x]=np.add(Sumdeltanabla[x],nabla[x])   # perchè sommi i delta ai deltanabla?
                 Sumbias[x]=np.add(Sumbias[x],adj[x])   
-            #print(Sumbias[0])
-            #print(Sumdeltanabla[0][5])
-            ############################################################
-            #exit(99999999) 
 
-        self.eta = 3
+
+        self.eta = 5
        
-        for x in range(len(self.pesi)):   # len(self.pesi) == 3
-            #self.pesi[x] = self.pesi[x]-(3/10)*Sumdeltanabla[x]
-            #self.bias[x] = self.bias[x]-(3/10)*Sumbias[x]
+        for x in range(len(self.pesi)):   
             for z in range(len(Sumdeltanabla[x])):
                 self.pesi[x][z] = self.pesi[x][z]-(self.eta/self.mb_size)*Sumdeltanabla[x][z]
             for z in range(len(Sumbias[x])):
                 self.bias[x][z]=self.bias[x][z]-(self.eta/self.mb_size)*Sumbias[x][z]
-            #print(self.bias[x],"mylayer",x)
 
-        #print("\n\n\n\n", self.pesi[2]) 
 
     
         
@@ -174,12 +162,12 @@ nn1 = nn([12,12])
 
 targets = []
 inputsTrain = []
-mydataset = open("data/MnistTrain.txt", "r")
-#mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
-for x in range(1000):
+#mydataset = open("data/MnistTrain.txt", "r")
+mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
+for x in range(30000):
     target = int(mydataset.read(1))
-    number = [int(x) for x in next(mydataset).split()]
-    #number = [1 if int(x)>150 else 0 for x in next(mydataset).split()]
+    #number = [int(x) for x in next(mydataset).split()]
+    number = [1 if int(x)>90 else 0 for x in next(mydataset).split()]
     targets.append(target)
     inputsTrain.append(number)
 
@@ -193,28 +181,27 @@ for i in range(len(targets)):
 mydataset.close()
 
 ####################################################
-# feedforward
-#for x in range(30):
-#    for j in range(10000):
-#        nabla,adj = nn1.backProp(inputsTrain[j], targetVectors[j])
-#        nn1.GradientDescent(nabla)
-
-#print(nn1.feedforward(inputsTrain[0]))
-
-#print(nn1.getPesi()[2])
-
-nn1.TrainNet(inputsTrain, targetVectors)
-
-#print("\n\n\n PESI: ", nn1.getPesi()[2])
-
-"""
-print(nn1.feedforward(inputsTrain[0]),"\n",targetVectors[0], "\n\n")
-print(nn1.feedforward(inputsTrain[100]),"\n",targetVectors[100], "\n\n")
-print(nn1.feedforward(inputsTrain[400]),"\n",targetVectors[400], "\n\n")
 
 
-for k in range(2000) :  # range(len(inputsTrain))
-    print(nn1.feedforward(inputsTrain[k]),"\n",targetVectors[k], "\n\n")
-"""
 
-print("\n\n\n\n\n\n")
+
+for x in range(10):
+    nn1.TrainNet(inputsTrain, targetVectors)
+
+
+for x in range(len(inputsTrain)):
+    output=nn1.feedforward(inputsTrain[x])
+    print("output desiderato: ",targets[x])
+    max=0
+    count=0
+    for z in range(len(output)):
+        if output[z]>max:
+            max=output[z]
+            count=z
+    print("output ottenuto: ",count)
+
+
+
+
+
+
