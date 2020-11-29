@@ -1,12 +1,10 @@
 import numpy as np
 
 
-
-
 class nn:
     def __init__(self, myLayers):
         self.myLayers = myLayers
-        self.NumberLayers = len(myLayers)
+        #self.NumberLayers = len(myLayers)
         # definisco primo layer di input
         self.previous = 784
         self.pesi = []
@@ -29,7 +27,8 @@ class nn:
         return 1.0/(1.0+np.exp(-x))
 
     def sigmond_der(self, x):
-        return self.sigmond(x)*(1-self.sigmond(x))
+        print(x)
+        return np.multiply(self.sigmond(x), (1-self.sigmond(x)))
 
     def cost_der(self, output_activations, y):
         return (output_activations-y)
@@ -61,11 +60,11 @@ class nn:
         # adj invertiti
         adj = []
         nablac = []
-        delPesi = []
         for x in range(len(self.myLayers) + 1):
             tempz = np.dot(self.pesi[x], np.array(temp))
             for t in range(len(tempz)):
-                tempz[t]=np.add(tempz[t],self.bias[x][t])
+                 tempz[t] = tempz[t] + self.bias[x][t]
+
             z.append(tempz)
             output = self.sigmond(tempz)
             a.append(output)
@@ -79,13 +78,11 @@ class nn:
 
         # BP2
         for x in range(1, len(self.myLayers)+1):
-            adl = np.multiply(np.dot(self.pesi[-x].T, tempAdj), self.sigmond_der(z[-1-x]))
+            adl = np.multiply(np.dot(self.pesi[-x].T, tempAdj), self.sigmond_der(np.array(z[-1-x])))
             tempAdj = adl
+            print(x, "        ", z[-1-x], "\n\n", self.sigmond_der(z[-1-x]), "\n\n")
             adj.insert(0, adl)
-
-
-
-
+        
 
         # BP4
         for x in range(0, len(self.myLayers)+1):
@@ -116,16 +113,21 @@ class nn:
 
 
 
-
-
-    def TrainNet(self,inputTr,inputTrag):
+    def TrainNet(self,inputTr,inputTrag):   
         #minibatch da 10
-        list_of_inp = zip(*(iter(inputTr),) * 10)
-        list_of_targ = zip(*(iter(inputTrag),) * 10)
-        list_Global= zip(list_of_inp,list_of_targ)
-        for x in list_Global:
-          self.minibatchUpd(x[0],x[1])
-
+        self.mb_size = 1
+        list_of_inp = zip(*(iter(inputTr),) * self.mb_size)
+        list_of_targ = zip(*(iter(inputTrag),) * self.mb_size)
+        list_Global = zip(list_of_inp,list_of_targ)
+       # print("QQQQQQ: ", len(list(list_of_inp)))   # len(list(list_of_inp))) == 1000  
+       
+        n = 0
+        nMax = 1000
+        for x in list_Global :
+            if n < nMax : 
+                self.minibatchUpd(x[0],x[1])
+                #print("mini batch numero ", n + 1, "\n")
+            n += 1
 
 
 
@@ -133,46 +135,35 @@ class nn:
     def minibatchUpd(self,inpTraining,inputTargM):
         Sumdeltanabla=[]
         Sumbias=[]
-        for x in range(len(inputTargM)):
-            nabla,adj=self.backProp(inpTraining[x],inputTargM[x])
+        for j in range(len(inputTargM)):   # len(inputTargM) == 10
+            nabla,adj=self.backProp(inpTraining[j],inputTargM[j])
             if(len(Sumdeltanabla)==0):
                 Sumdeltanabla=nabla
                 Sumbias=adj
-            print(adj[0]) #??????
+            #print(adj[0]) #??????
             for x in range(len(nabla)):
-                Sumdeltanabla[x]=np.add(Sumdeltanabla[x],nabla[x])
-                Sumbias[x]=np.add(Sumbias[x],adj[x])
-            print(Sumbias[0])
-            print(Sumdeltanabla[0][5])
+                Sumdeltanabla[x]=np.add(Sumdeltanabla[x],nabla[x])   # perchè sommi i delta ai deltanabla?
+                Sumbias[x]=np.add(Sumbias[x],adj[x])   
+            #print(Sumbias[0])
+            #print(Sumdeltanabla[0][5])
             ############################################################
-            exit(99999999) 
+            #exit(99999999) 
 
-
+        self.eta = 3
        
-        for x in range(len(self.pesi)):
+        for x in range(len(self.pesi)):   # len(self.pesi) == 3
             #self.pesi[x] = self.pesi[x]-(3/10)*Sumdeltanabla[x]
             #self.bias[x] = self.bias[x]-(3/10)*Sumbias[x]
             for z in range(len(Sumdeltanabla[x])):
-                self.pesi[x][z] = self.pesi[x][z]-(3/10)*Sumdeltanabla[x][z]
+                self.pesi[x][z] = self.pesi[x][z]-(self.eta/self.mb_size)*Sumdeltanabla[x][z]
             for z in range(len(Sumbias[x])):
-                self.bias[x][z]=self.bias[x][z]-(3/10)*Sumbias[x][z]
+                self.bias[x][z]=self.bias[x][z]-(self.eta/self.mb_size)*Sumbias[x][z]
             #print(self.bias[x],"mylayer",x)
+
+        #print("\n\n\n\n", self.pesi[2]) 
 
     
         
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -183,10 +174,9 @@ nn1 = nn([12,12])
 
 targets = []
 inputsTrain = []
-#mydataset = open("data/MnistTrain.txt", "r")
-mydataset = open(
-    r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
-for x in range(10000):
+mydataset = open("data/MnistTrain.txt", "r")
+#mydataset = open(r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
+for x in range(1000):
     target = int(mydataset.read(1))
     number = [int(x) for x in next(mydataset).split()]
     #number = [1 if int(x)>150 else 0 for x in next(mydataset).split()]
@@ -202,9 +192,6 @@ for i in range(len(targets)):
 
 mydataset.close()
 
-
-
-
 ####################################################
 # feedforward
 #for x in range(30):
@@ -212,16 +199,22 @@ mydataset.close()
 #        nabla,adj = nn1.backProp(inputsTrain[j], targetVectors[j])
 #        nn1.GradientDescent(nabla)
 
+#print(nn1.feedforward(inputsTrain[0]))
+
+#print(nn1.getPesi()[2])
+
+nn1.TrainNet(inputsTrain, targetVectors)
+
+#print("\n\n\n PESI: ", nn1.getPesi()[2])
+
+"""
+print(nn1.feedforward(inputsTrain[0]),"\n",targetVectors[0], "\n\n")
+print(nn1.feedforward(inputsTrain[100]),"\n",targetVectors[100], "\n\n")
+print(nn1.feedforward(inputsTrain[400]),"\n",targetVectors[400], "\n\n")
 
 
-print(nn1.feedforward(inputsTrain[0]))
+for k in range(2000) :  # range(len(inputsTrain))
+    print(nn1.feedforward(inputsTrain[k]),"\n",targetVectors[k], "\n\n")
+"""
 
-
-for j in range(1):
-    nn1.TrainNet(inputsTrain, targetVectors)
-
-
-
-print(nn1.feedforward(inputsTrain[0]),"\n",targetVectors[0])
-
-
+print("\n\n\n\n\n\n")
