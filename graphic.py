@@ -209,14 +209,23 @@ def main():
     numberOfEpochs = 10    # 10
 
     try:
-        binary_file_pesi = open('Pesi.bin', mode='rb')   
-        binary_file_bias = open('Bias.bin', mode='rb') 
+    #    binary_file_pesi = open('Pesi.bin', mode='rb')   
+     #   binary_file_bias = open('Bias.bin', mode='rb') 
 
-        my_pesi=pickle.load(binary_file_pesi)
-        nn1.setPesi(my_pesi)
-        my_bias=pickle.load(binary_file_bias)
-        nn1.setBias(my_bias)
-        print("Pesi già presenti!")
+      #  my_pesi=pickle.load(binary_file_pesi)
+       # nn1.setPesi(my_pesi)
+        #my_bias=pickle.load(binary_file_bias)
+        #nn1.setBias(my_bias)
+        #print("Pesi già presenti!")
+
+        binary_file_pesi = open('Data.bin', mode='rb') 
+        t=[]
+        for _ in range(2):
+           t.append(pickle.load(binary_file_pesi))
+        nn1.setPesi(t[0])
+        nn1.setBias(t[1])
+
+
 
     #training if reading fails  
     except IOError:
@@ -271,8 +280,13 @@ def main():
             nn1.TrainNet(inputsTrain, targetVectors)
             print("EFFICIENCY", l+1, ": ", getEfficiency(inputsTest, targetsTest))
 
-        tempPesi=pickle.dump(nn1.getPesi(),open('Pesi.bin', 'wb'))
-        tempBias=pickle.dump(nn1.getBias(),open('Bias.bin', 'wb'))
+
+       # tempPesi=pickle.dump(nn1.getPesi(),open('Pesi.bin', 'wb'))
+        #tempBias=pickle.dump(nn1.getBias(),open('Bias.bin', 'wb'))
+
+        Data=open('Data.bin', 'wb')
+        pickle.dump(nn1.getPesi(),Data)
+        pickle.dump(nn1.getBias(),Data)
 
 
 
