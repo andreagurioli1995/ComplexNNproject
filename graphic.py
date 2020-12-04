@@ -198,60 +198,16 @@ def main():
     app = QApplication(sys.argv)
     ex = Example()
 
-    ######################################################################################
-    # input dal file
 
 
-    targetsTrain = []
-    inputsTrain = []
-    #mydataset = open("data/mnistTrain.txt", "r")
-    mydataset = open(
-        r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
-    for x in range(30000):  # numberOfinputs 30000
-        targetTrain = int(mydataset.read(1))
-        number = [normalize(float(x)) for x in next(mydataset).split()]
-        #number = [1 if int(x)>90 else 0 for x in next(mydataset).split()]
-        targetsTrain.append(targetTrain)
-        inputsTrain.append(number)
-    # vettori di targetTrain
-    targetVectors = []
-    for i in range(len(targetsTrain)):
-        targetVectors.append(
-            [float(1) if x == targetsTrain[i] else float(0) for x in range(10)])
-
-    mydataset.close()
 
 
-    ######################################################################################
-    #Testing data
-
-    targetsTest = []
-    inputsTest = []
-    #testDataset = open("data/mnistTest.txt", "r")
-    testDataset = open(
-        r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTest_copy.txt", "r")
-    for x in range(10000):     # len(inputsTest) == 10000
-        targetTest = int(testDataset.read(1))
-        numberTest = [normalize(float(x)) for x in next(testDataset).split()]
-        #numberTest = [1 if int(x)>90 else 0 for x in next(testDataset).split()]
-        targetsTest.append(targetTest)
-        inputsTest.append(numberTest)
-
-    # vettori di targetTrain
-    targetsTestVectors = []
-    for i in range(len(targetsTest)):
-        targetsTestVectors.append(
-            [float(1) if x == targetsTest[i] else float(0) for x in range(10)])
-
-    testDataset.close()
-
-    ######################################################################################
-    #Training
+ ######################################################################################
+    #Reading
     global nn1
     nn1 = nn([28,16])
     numberOfEpochs = 10    # 10
-    print("\n\neta =", nn1.getEta(), " mb size =", nn1.getmbSize(),
-        "\nEFFICIENCY 0 : ", getEfficiency(inputsTest, targetsTest))
+
     try:
         binary_file_pesi = open('Pesi.bin', mode='rb')   
         binary_file_bias = open('Bias.bin', mode='rb') 
@@ -261,21 +217,62 @@ def main():
         my_bias=pickle.load(binary_file_bias)
         nn1.setBias(my_bias)
         print("Pesi già presenti!")
-        print("\n\neta =", nn1.getEta(), " mb size =", nn1.getmbSize(),
-        "\nEFFICIENCY 0 : ", getEfficiency(inputsTest, targetsTest))
-    
 
-
+    #training if reading fails  
     except IOError:
-        print("Pesi mancanti!")
+        print("Pesi mancanti, inizio training")
+        ######################################################################################
+        # input dal file
+
+
+        targetsTrain = []
+        inputsTrain = []
+        #mydataset = open("data/mnistTrain.txt", "r")
+        mydataset = open(
+            r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
+        for x in range(30000):  # numberOfinputs 30000
+            targetTrain = int(mydataset.read(1))
+            number = [normalize(float(x)) for x in next(mydataset).split()]
+            #number = [1 if int(x)>90 else 0 for x in next(mydataset).split()]
+            targetsTrain.append(targetTrain)
+            inputsTrain.append(number)
+        # vettori di targetTrain
+        targetVectors = []
+        for i in range(len(targetsTrain)):
+            targetVectors.append(
+                [float(1) if x == targetsTrain[i] else float(0) for x in range(10)])
+
+        mydataset.close()
+
+
+        ######################################################################################
+        #Testing data
+
+        targetsTest = []
+        inputsTest = []
+        #testDataset = open("data/mnistTest.txt", "r")
+        testDataset = open(
+            r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTest_copy.txt", "r")
+        for x in range(10000):     # len(inputsTest) == 10000
+            targetTest = int(testDataset.read(1))
+            numberTest = [normalize(float(x)) for x in next(testDataset).split()]
+            targetsTest.append(targetTest)
+            inputsTest.append(numberTest)
+
+        # vettori di targetTrain
+        targetsTestVectors = []
+        for i in range(len(targetsTest)):
+            targetsTestVectors.append(
+                [float(1) if x == targetsTest[i] else float(0) for x in range(10)])
+
+        testDataset.close()
+
         for l in range(numberOfEpochs):
             nn1.TrainNet(inputsTrain, targetVectors)
             print("EFFICIENCY", l+1, ": ", getEfficiency(inputsTest, targetsTest))
 
         tempPesi=pickle.dump(nn1.getPesi(),open('Pesi.bin', 'wb'))
         tempBias=pickle.dump(nn1.getBias(),open('Bias.bin', 'wb'))
-
-
 
 
 
