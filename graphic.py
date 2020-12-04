@@ -205,8 +205,8 @@ def main():
  ######################################################################################
     #Reading
     global nn1
-    nn1 = nn([28,16])
-    numberOfEpochs = 10    # 10
+    nn1 = nn([28,18,12])
+    numberOfEpochs = 15    # 10
 
     try:
     #    binary_file_pesi = open('Pesi.bin', mode='rb')   
@@ -224,7 +224,7 @@ def main():
            t.append(pickle.load(binary_file_pesi))
         nn1.setPesi(t[0])
         nn1.setBias(t[1])
-
+        print("Pesi già presenti!")
 
 
     #training if reading fails  
