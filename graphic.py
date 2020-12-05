@@ -86,13 +86,14 @@ class prova(QLabel):
         self.update()
         if config.y==1:
             config.x=self.mnist
-            print(config.x)
+            #print(config.x)
             self.image.fill(Qt.black)
             config.y=1
-            config.x=[normalize(float(x)) for x in config.x]
-            print(config.x)
+            #config.x=[normalize(float(x)) for x in config.x]
+            config.x=[1 if int(x)>90 else 0 for x in config.x]
+           # print(config.x)
             print(result(nn1.feedforward(config.x)))
-            printNumber(config.x)
+           # printNumber(config.x)
         #self.cancelImage()
         
 
@@ -123,7 +124,7 @@ class Example(QWidget):
         #prova().saveImage()
 
         print(result(nn1.feedforward(config.x)))
-        printNumber(config.x)
+       # printNumber(config.x)
 
         #print(config.x)
       
@@ -206,7 +207,7 @@ def main():
     #Reading
     global nn1
     nn1 = nn([28,18,12])
-    numberOfEpochs = 15    # 10
+    numberOfEpochs = 10    # 10
 
     try:
     #    binary_file_pesi = open('Pesi.bin', mode='rb')   
@@ -239,10 +240,10 @@ def main():
         #mydataset = open("data/mnistTrain.txt", "r")
         mydataset = open(
             r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTrain_copy.txt", "r")
-        for x in range(30000):  # numberOfinputs 30000
+        for x in range(40000):  # numberOfinputs 30000
             targetTrain = int(mydataset.read(1))
-            number = [normalize(float(x)) for x in next(mydataset).split()]
-            #number = [1 if int(x)>90 else 0 for x in next(mydataset).split()]
+            #number = [normalize(float(x)) for x in next(mydataset).split()]
+            number = [1 if int(x)>90 else 0 for x in next(mydataset).split()]
             targetsTrain.append(targetTrain)
             inputsTrain.append(number)
         # vettori di targetTrain
@@ -252,7 +253,7 @@ def main():
                 [float(1) if x == targetsTrain[i] else float(0) for x in range(10)])
 
         mydataset.close()
-
+        print("training terminato")
 
         ######################################################################################
         #Testing data
