@@ -5,10 +5,10 @@ import config
 import numpy as np
 import sys
 import pickle
+from random import randint
 from nn import nn
 
-nn1=None
-class prova(QLabel):
+class QLabelDraw(QLabel):
     
     def __init__(self):
         super().__init__()
@@ -16,7 +16,7 @@ class prova(QLabel):
         left = 400
         width = 400
         height = 400
-        vettore=[]
+
         self.setStyleSheet("margin:5px; border:1px solid rgb(0, 255, 0); ")
         self.setGeometry(top, left, width, height)
         self.image = QImage(self.size(), QImage.Format_Grayscale8)
@@ -30,22 +30,14 @@ class prova(QLabel):
         self.lastPoint = QPoint()    
         self.setStyleSheet("border: 10px solid black;")
         self.mnist=[]
-        self.test=[]  
-        config.x = []
-       
-        
- 
-    def get_image(self):
-        return self.image
 
+    #funzioni di disegno tramite lo spostamento del mouse 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.drawing = True
             self.lastPoint = event.pos()
-            print(self.lastPoint)
-       
 
-
+    #funzioni di disegno tramite lo spostamento del mouse    
     def mouseMoveEvent(self, event):
         if(event.buttons() & Qt.LeftButton) & self.drawing:
             painter = QPainter(self.image)
@@ -53,61 +45,44 @@ class prova(QLabel):
             painter.drawLine(self.lastPoint, event.pos())
             self.lastPoint = event.pos()
             self.update()
-        
-        
+    
+    #funzioni di disegno tramite lo spostamento del mouse    
     def mouseReleaseEvent(self, event):
          if event.button() == Qt.LeftButton:
             self.drawing = False
             self.update()
-            self.saveImage()
-
-
 
     def paintEvent(self, event):
         canvasPainter  = QPainter(self)
         canvasPainter.drawImage(self.rect(),self.image, self.image.rect() )
         self.update()
 
+    #salva l'immagine disegnata 
     def saveImage(self):
-        print(config.y)
         del self.mnist[:]
-        del config.x [:]
-        self.img_temp=self.image
-        self.img = QImage((self.img_temp)).scaled(28, 28, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
-        print(self.img.isGrayscale())
         
-        self.cont=0
+        #resize dell'immagine da 400x400 a 28x28
+        self.img = QImage((self.image)).scaled(28, 28, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+
+        #salvataggio del colore dei pixel nell'array msist
         for i in range(28):
             for j in range(28):
                 self.value=self.img.pixel(j,i)%256
                 self.mnist.append(self.value)
-        #Example().set_mnist(self.mnist)
-        #print(self.mnist)
-        self.update()
-        if config.y==1:
-            config.x=self.mnist
-            #print(config.x)
-            self.image.fill(Qt.black)
-            config.y=1
-            #config.x=[normalize(float(x)) for x in config.x]
-            config.x=[1 if int(x)>90 else 0 for x in config.x]
-           # print(config.x)
-            print(result(nn1.feedforward(config.x)))
-           # printNumber(config.x)
-        #self.cancelImage()
-        
 
+        #inserimento del vettore mnist nella rete neurale
+            #config.x=[normalize(float(x)) for x in config.x]
+        #----self.mnist=[1 if int(x)>90 else 0 for x in self.mnist]
+        #----print(result(nn1.feedforward(self.mnist)))
+        #result=result(nn1.feedforward(self.mnist))
+        print(self.mnist)
+        result =randint(0, 9)
+        return result
+        
+    #cancella l'immagine disegnata
     def cancelImage(self):
-        #self.image = QImage(self.size(), QImage.Format_Grayscale8)
-        self.image= None
-        self.image = QImage(self.size(), QImage.Format_Grayscale8)
         self.image.fill(Qt.black)
         self.update()
-     
-    def get_mnist(self):
-        #self.test.append(self.mnist)
-        #print(self.test)
-        return self.test
 
 class Example(QWidget):
     
@@ -115,52 +90,49 @@ class Example(QWidget):
         super().__init__()
         self.mnist_copy=[]
         self.initUI()
-        config.y =1
     
-    def set_mnist(self,a):
-        self.mnist_copy=a
-
+    #richiama la funzione di salvataggio in QLabelDraw returnando il valore stampato dalla rete neurale
     def save(self):
-        #prova().saveImage()
+        
+        nn_result=self.QLabelDraw.saveImage()
+        
+        #inserisce l'immagine .jpg rappresentante il numero finale nel labelImage
+        self.labelImage.clear()
+        final_image='C:\\Users\\giovi\\Documents\\GitHub\\ComplexNNproject\\number\\number'+str(nn_result)+'.jpg'
+        self.pixmap = QPixmap(final_image)
+        self.labelImage.setPixmap(self.pixmap)
+       #print(result(nn1.feedforward(config.x)))
 
-        print(result(nn1.feedforward(config.x)))
-       # printNumber(config.x)
-
-        #print(config.x)
-      
-       
-    
+    #richiama la funzione di cancellazione del disegno e cancella l'immagine .jpg sostituendola con una nera 
     def cancel(self):
-       #prova().cancelImage()
-       # self.image.fill(Qt.white)
-       # self.update()
-       config.y=1
-       print(config.y)
-       prova().saveImage()
-       self.labelProva.clear()
-
+        self.QLabelDraw.cancelImage()
+        blackimage='C:\\Users\\giovi\\Documents\\GitHub\\ComplexNNproject\\number\\none.jpg'
+        self.pixmap = QPixmap(blackimage)
+        self.labelImage.setPixmap(self.pixmap)
+    
+    #inizializzazione dei layout e label che compongono l'applicazione
     def initUI(self):
         
         layout1 = QHBoxLayout()
         layout2 = QVBoxLayout()
         layout3 = QVBoxLayout()
 
-        labelImage = QLabel(self)
+        #label dell'immagine .jpg
+        self.labelImage = QLabel(self)
 
-        self.labelProva = prova()
-        labelImage.setStyleSheet("border: 1px solid black;") 
-        pixmap = QPixmap("number.jpg")
-        self.labelProva.setFixedSize(400, 400)
-        self.labelProva.setStyleSheet("border: 100px solid black;") 
-        labelImage.setPixmap(pixmap)
-        labelImage.setFixedSize(400, 400)
+        #label disegnabile 
+        self.QLabelDraw = QLabelDraw()
+        self.labelImage.setStyleSheet("border: 1px solid black;") 
+        blackimage='C:\\Users\\giovi\\Documents\\GitHub\\ComplexNNproject\\number\\none.jpg'
+        self.pixmap = QPixmap(blackimage)
+        self.QLabelDraw.setFixedSize(400, 400)
+        self.QLabelDraw.setStyleSheet("border: 100px solid black;") 
+        self.labelImage.setPixmap(self.pixmap)
+        self.labelImage.setFixedSize(400, 400)
 
-        layout2.addWidget(self.labelProva)
-        layout3.addWidget(labelImage)
+        layout2.addWidget(self.QLabelDraw)
+        layout3.addWidget(self.labelImage)
         
-       
-        #okButton = QPushButton("OK")
-        #cancelButton = QPushButton("Cancel")
         saveButton = QPushButton('Save', self)
         cancelButton = QPushButton('Cancel', self)
         saveAction = QAction(QIcon("icons/save.jpg"), "Save",self)
@@ -176,19 +148,14 @@ class Example(QWidget):
 
         layout2.addWidget(saveButton)
         layout3.addWidget(cancelButton)
-        #okButton.move(0, 0) 
         
         layout1.addLayout(layout2)
         layout1.addLayout(layout3)
-        # moving the widget 
-        # move(left, top) 
         
-
-        #vbox.addLayout(label)
         widget = QWidget(self)
         widget.setLayout(layout1)
         self.setGeometry(0, 0, 825, 450)
-        self.setWindowTitle('Buttons')
+        self.setWindowTitle('Number Recognition')
         self.show()
 
     
@@ -198,9 +165,7 @@ def main():
     
     app = QApplication(sys.argv)
     ex = Example()
-
-
-
+    
 
 
  ######################################################################################
@@ -291,14 +256,9 @@ def main():
 
 
 
-
-
-
     ######################################################################################
-    sys.exit(app.exec_())
 
-
-
+sys.exit(app.exec_())
 ######################################################################################
 # funzioni ausiliarie
 
@@ -339,7 +299,6 @@ def printNumber(n) :
                 print(" ", end =" ")
         print("")
     
-
 
 
 
