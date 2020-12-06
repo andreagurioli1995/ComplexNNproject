@@ -72,12 +72,10 @@ class QLabelDraw(QLabel):
 
         #inserimento del vettore mnist nella rete neurale
             #config.x=[normalize(float(x)) for x in config.x]
-        #----self.mnist=[1 if int(x)>90 else 0 for x in self.mnist]
-        #----print(result(nn1.feedforward(self.mnist)))
-        #result=result(nn1.feedforward(self.mnist))
-        print(self.mnist)
-        result =randint(0, 9)
-        return result
+        self.mnist=[1 if int(x)>90 else 0 for x in self.mnist]
+        my_result=result(nn1.feedforward(self.mnist))
+        print(my_result)
+        return my_result
         
     #cancella l'immagine disegnata
     def cancelImage(self):
@@ -98,7 +96,7 @@ class Example(QWidget):
         
         #inserisce l'immagine .jpg rappresentante il numero finale nel labelImage
         self.labelImage.clear()
-        final_image='C:\\Users\\giovi\\Documents\\GitHub\\ComplexNNproject\\number\\number'+str(nn_result)+'.jpg'
+        final_image='number'+str(nn_result)+'.jpg'
         self.pixmap = QPixmap(final_image)
         self.labelImage.setPixmap(self.pixmap)
        #print(result(nn1.feedforward(config.x)))
@@ -106,7 +104,7 @@ class Example(QWidget):
     #richiama la funzione di cancellazione del disegno e cancella l'immagine .jpg sostituendola con una nera 
     def cancel(self):
         self.QLabelDraw.cancelImage()
-        blackimage='C:\\Users\\giovi\\Documents\\GitHub\\ComplexNNproject\\number\\none.jpg'
+        blackimage='none.jpg'
         self.pixmap = QPixmap(blackimage)
         self.labelImage.setPixmap(self.pixmap)
     
@@ -123,7 +121,7 @@ class Example(QWidget):
         #label disegnabile 
         self.QLabelDraw = QLabelDraw()
         self.labelImage.setStyleSheet("border: 1px solid black;") 
-        blackimage='C:\\Users\\giovi\\Documents\\GitHub\\ComplexNNproject\\number\\none.jpg'
+        blackimage='none.jpg'
         self.pixmap = QPixmap(blackimage)
         self.QLabelDraw.setFixedSize(400, 400)
         self.QLabelDraw.setStyleSheet("border: 100px solid black;") 
@@ -258,7 +256,7 @@ def main():
 
     ######################################################################################
 
-sys.exit(app.exec_())
+    sys.exit(app.exec_())
 ######################################################################################
 # funzioni ausiliarie
 
