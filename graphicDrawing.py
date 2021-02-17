@@ -169,8 +169,8 @@ def main():
  ######################################################################################
     #Reading
     global nn1
-    nn1 = nn([28,18,12])
-    numberOfEpochs = 10    # 10
+    nn1 = nn([70,16])
+    numberOfEpochs = 30    # 10
 
     try:
     #    binary_file_pesi = open('Pesi.bin', mode='rb')   

@@ -8,7 +8,7 @@ class nn:
         # definisco primo layer di input
         self.previous = 784
         self.eta = 1
-        self.mb_size = 10 #minibatch da 10
+        self.mb_size = 5 #minibatch da 5
         self.pesi = []
         self.bias=[]
         for x in self.myLayers:
