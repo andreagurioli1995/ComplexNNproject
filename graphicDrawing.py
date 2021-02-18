@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication ,QLabel, QMenu, QFrame, QMenuBar,QHBoxLayout,QVBoxLayout,QAction, QFileDialog, QWidget, QPushButton
-from PyQt5.QtGui import QIcon, QImage, QPainter, QPen, QBrush,QPixmap
+from PyQt5.QtGui import QIcon, QImage, QPainter, QPen, QBrush,QPixmap,QLinearGradient,QRadialGradient
 from PyQt5.QtCore import Qt, QPoint
 import config 
 import numpy as np
@@ -24,7 +24,8 @@ class QLabelDraw(QLabel):
         self.image.fill(Qt.black)
         self.image
         self.drawing = False
-        self.brushSize = 25
+        self.brushSize =30
+
         self.brushColor = Qt.white
         self.brushColor2 = Qt.black
         self.lastPoint = QPoint()    
@@ -41,7 +42,8 @@ class QLabelDraw(QLabel):
     def mouseMoveEvent(self, event):
         if(event.buttons() & Qt.LeftButton) & self.drawing:
             painter = QPainter(self.image)
-            painter.setPen(QPen(self.brushColor, self.brushSize, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+            
+            painter.setPen(QPen(self.brushColor, self.brushSize))
             painter.drawLine(self.lastPoint, event.pos())
             self.lastPoint = event.pos()
             self.update()
@@ -63,7 +65,9 @@ class QLabelDraw(QLabel):
         
         #resize dell'immagine da 400x400 a 28x28
         self.img = QImage((self.image)).scaled(28, 28, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+        self.image = QImage((self.image)).scaled(28, 28, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
 
+        #self.image=QImage((self.image)).scaled(28, 28, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
         #salvataggio del colore dei pixel nell'array msist
         for i in range(28):
             for j in range(28):
@@ -72,14 +76,17 @@ class QLabelDraw(QLabel):
 
         #inserimento del vettore mnist nella rete neurale
             #config.x=[normalize(float(x)) for x in config.x]
-        self.mnist=[1 if int(x)>90 else 0 for x in self.mnist]
+        self.mnist=[1 if int(x)>10 else 0 for x in self.mnist]    
         my_result=result(nn1.feedforward(self.mnist))
+        print(nn1.feedforward(self.mnist))
         print(my_result)
         return my_result
         
     #cancella l'immagine disegnata
     def cancelImage(self):
         self.image.fill(Qt.black)
+        self.image = QImage((self.image)).scaled(400, 400, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+
         self.update()
 
 class Example(QWidget):

@@ -8,79 +8,10 @@ import pickle
 from random import randint
 from nn import nn
 
-class QLabelDraw(QLabel):
-    
-    def __init__(self):
-        super().__init__()
-        top = 400
-        left = 400
-        width = 400
-        height = 400
 
-        self.setStyleSheet("margin:5px; border:1px solid rgb(0, 255, 0); ")
-        self.setGeometry(top, left, width, height)
-        self.image = QImage(self.size(), QImage.Format_Grayscale8)
-        
-        self.image.fill(Qt.black)
-        self.image
-        self.drawing = False
-        self.brushSize = 25
-        self.brushColor = Qt.white
-        self.brushColor2 = Qt.black
-        self.lastPoint = QPoint()    
-        self.setStyleSheet("border: 10px solid black;")
-        self.mnist=[]
+inputsTest = []
+targetsTest = []
 
-    #funzioni di disegno tramite lo spostamento del mouse 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.drawing = True
-            self.lastPoint = event.pos()
-
-    #funzioni di disegno tramite lo spostamento del mouse    
-    def mouseMoveEvent(self, event):
-        if(event.buttons() & Qt.LeftButton) & self.drawing:
-            painter = QPainter(self.image)
-            painter.setPen(QPen(self.brushColor, self.brushSize, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
-            painter.drawLine(self.lastPoint, event.pos())
-            self.lastPoint = event.pos()
-            self.update()
-    
-    #funzioni di disegno tramite lo spostamento del mouse    
-    def mouseReleaseEvent(self, event):
-         if event.button() == Qt.LeftButton:
-            self.drawing = False
-            self.update()
-
-    def paintEvent(self, event):
-        canvasPainter  = QPainter(self)
-        canvasPainter.drawImage(self.rect(),self.image, self.image.rect() )
-        self.update()
-
-    #salva l'immagine disegnata 
-    def saveImage(self):
-        del self.mnist[:]
-        
-        #resize dell'immagine da 400x400 a 28x28
-        self.img = QImage((self.image)).scaled(28, 28, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
-
-        #salvataggio del colore dei pixel nell'array msist
-        for i in range(28):
-            for j in range(28):
-                self.value=self.img.pixel(j,i)%256
-                self.mnist.append(self.value)
-
-        #inserimento del vettore mnist nella rete neurale
-            #config.x=[normalize(float(x)) for x in config.x]
-        self.mnist=[1 if int(x)>90 else 0 for x in self.mnist]
-        my_result=result(nn1.feedforward(self.mnist))
-        print(my_result)
-        return my_result
-        
-    #cancella l'immagine disegnata
-    def cancelImage(self):
-        self.image.fill(Qt.black)
-        self.update()
 
 class Example(QWidget):
     
@@ -91,14 +22,55 @@ class Example(QWidget):
     
     #richiama la funzione di salvataggio in QLabelDraw returnando il valore stampato dalla rete neurale
     def save(self):
-        
-        nn_result=self.QLabelDraw.saveImage()
-        
+        global inputsTest
+        global targetTest
+        #nn_result=self.QLabelDraw.saveImage()
         #inserisce l'immagine .jpg rappresentante il numero finale nel labelImage
-        self.labelImage.clear()
-        final_image='number'+str(nn_result)+'.jpg'
+        
+        #self.labelImage.clear()
+        #final_image='number'+str(nn_result)+'.jpg'
+        #self.pixmap = QPixmap(final_image)
+        #self.labelImage.setPixmap(self.pixmap)
+        h=28
+        w=28
+        testArray = []
+        #global testDataset
+        value=np.random.randint(0,10000)
+       # testDataset = open(
+        #    r"C:\\Users\\giovi\\Desktop\\dati\\mnistTest_copy.txt", "r")
+            #r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTest_copy.txt", "r")
+       # for x in range(10000):     # len(inputsTest) == 10000
+        #    targetTest = int(testDataset.read(1))
+         #   numberTest =[int(x) for x in next(testDataset).split()]
+          #  if x==value:
+           #     testArray=numberTest
+        testArray= inputsTest[value]
+        testArray=np.array(testArray, dtype=np.uint8)
+        testArray=testArray.reshape(28,28)
+        #####################
+        im =testArray
+        a = QLabel()
+        a.resize(400,400)
+        im = QImage(im.data, im.shape[1], im.shape[0], QImage.Format_Grayscale8)
+        pix = QPixmap(im).scaled(self.QLabelDraw.width(), self.QLabelDraw.height())
+        self.QLabelDraw.setPixmap(pix)
+        output=nn1.feedforward(inputsTest[value])
+        Max = 0
+        mynumber=0
+
+        for x in range(len(output)):
+           if output[x]>Max:
+                Max=output[x]
+                mynumber=x
+        print(mynumber)
+        final_image='number'+str(mynumber)+'.jpg'
         self.pixmap = QPixmap(final_image)
         self.labelImage.setPixmap(self.pixmap)
+                
+        
+
+
+      
        #print(result(nn1.feedforward(config.x)))
 
     #richiama la funzione di cancellazione del disegno e cancella l'immagine .jpg sostituendola con una nera 
@@ -119,12 +91,21 @@ class Example(QWidget):
         self.labelImage = QLabel(self)
 
         #label disegnabile 
-        self.QLabelDraw = QLabelDraw()
+        self.QLabelDraw = QLabel()
+        self.QLabelDraw.setFixedSize(400, 400)
+        h, w = 28, 28
+
         self.labelImage.setStyleSheet("border: 1px solid black;") 
         blackimage='none.jpg'
         self.pixmap = QPixmap(blackimage)
-        self.QLabelDraw.setFixedSize(400, 400)
-        self.QLabelDraw.setStyleSheet("border: 100px solid black;") 
+
+
+        im = np.random.randint(0, 255, [h, w], np.uint8)
+        im = QImage(im.data, im.shape[1], im.shape[0], QImage.Format_Grayscale8)
+        pix = QPixmap(im).scaled(self.QLabelDraw.width(), self.QLabelDraw.height())
+        self.QLabelDraw.setPixmap(pix)
+        
+
         self.labelImage.setPixmap(self.pixmap)
         self.labelImage.setFixedSize(400, 400)
 
@@ -160,7 +141,21 @@ class Example(QWidget):
 
 
 def main():
-    
+    global inputsTest
+    global targetsTest
+    testDataset = open(
+            r"C:\\Users\\giovi\\Desktop\\dati\\mnistTest_copy.txt", "r")
+            #r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTest_copy.txt", "r")
+    for x in range(10000):     # len(inputsTest) == 10000
+        targetTestV = int(testDataset.read(1))
+        numberTest =[int(x) for x in next(testDataset).split()]
+        targetsTest.append(targetTestV)
+        inputsTest.append(numberTest)
+
+
+
+
+
     app = QApplication(sys.argv)
     ex = Example()
     
