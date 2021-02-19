@@ -112,8 +112,8 @@ class Example(QWidget):
         layout2.addWidget(self.QLabelDraw)
         layout3.addWidget(self.labelImage)
         
-        saveButton = QPushButton('Save', self)
-        cancelButton = QPushButton('Cancel', self)
+        saveButton = QPushButton('Next prediction', self)
+        cancelButton = QPushButton('Exit', self)
         saveAction = QAction(QIcon("icons/save.jpg"), "Save",self)
         saveAction.setShortcut("Ctrl+S")
         saveButton.addAction(saveAction)
@@ -144,8 +144,8 @@ def main():
     global inputsTest
     global targetsTest
     testDataset = open(
-            r"C:\\Users\\giovi\\Desktop\\dati\\mnistTest_copy.txt", "r")
-            #r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTest_copy.txt", "r")
+            #r"C:\\Users\\giovi\\Desktop\\dati\\mnistTest_copy.txt", "r")
+            r"C:\\Users\\bigfo\\OneDrive\\Desktop\\dati\\mnistTest_copy.txt", "r")
     for x in range(10000):     # len(inputsTest) == 10000
         targetTestV = int(testDataset.read(1))
         numberTest =[int(x) for x in next(testDataset).split()]
